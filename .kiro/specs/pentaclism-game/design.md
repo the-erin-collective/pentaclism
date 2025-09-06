@@ -103,6 +103,10 @@ interface ResourceManager {
   calculateResourceGeneration(playerId: string): ResourceDelta
   processResourceTransaction(transaction: ResourceTransaction): boolean
   validateResourceCost(playerId: string, cost: ResourceCost): boolean
+  validateCapacityRequirement(playerId: string, capacityRequirement: CapacityRequirement): boolean
+  processCapacityAllocation(playerId: string, allocation: CapacityAllocation): boolean
+  releaseCapacityAllocation(playerId: string, allocationId: string): void
+  getCurrentCapacityUsage(playerId: string): CapacityUsage
   applyResourceDecay(playerId: string): ResourceDelta
 }
 ```
@@ -216,6 +220,61 @@ interface ExperienceManager {
   calculateRank(experience: number): number
   processRetraining(unitId: string, targetType: UnitTypeId): RetrainingResult
   validateUpgradeLimit(unitId: string, upgrade: UpgradeId): boolean
+  calculateTrainingTimeReduction(unitRank: number, baseTime: number): number
+  preserveExperienceOnRetraining(unitId: string, retentionRate: number): void
+}
+```
+
+### Worker System and Expansion
+
+#### Worker Manager
+```typescript
+interface WorkerManager {
+  // Generic Worker Operations
+  assignWorkerTask(workerId: string, task: WorkerTask): TaskAssignment
+  validateWorkerCapability(workerId: string, task: WorkerTask): boolean
+  processWorkerUpgrade(workerId: string, upgradeType: WorkerUpgradeType): UpgradeResult
+  
+  // Faction-Specific Worker Mechanics
+  processScavengerCrewUpgrade(workerId: string): ZabatekPilot
+  manageDualWorkerSystem(playerId: string, workerType: 'citizen' | 'engineer'): WorkerAssignment
+  handleAutomatedConstruction(droneId: string, buildSite: BuildSite): AutoBuildResult
+  manageTunnelConnectivity(workerId: string, buildingId: string): TunnelValidation
+  processRailDependentConstruction(workerId: string, buildSite: BuildSite): RailValidation
+  
+  // Expansion Mechanics
+  validateExpansionRequirements(playerId: string, expansionType: ExpansionType): ExpansionValidation
+  processWallBasedExpansion(playerId: string, wallSegments: WallSegment[]): ExpansionResult
+  manageEnergyGridExpansion(playerId: string, pylonNetwork: PylonNetwork): GridExpansion
+  handleTunnelNetworkExpansion(playerId: string, tunnelConnections: TunnelConnection[]): NetworkExpansion
+  processRailNetworkAdvancement(playerId: string, railSegments: RailSegment[]): RailExpansion
+}
+```
+
+### Detection and Counter-Detection System
+
+#### Detection Manager
+```typescript
+interface DetectionManager {
+  // Detection Systems
+  deployUndergroundSensor(playerId: string, coordinate: HexCoordinate): DetectionSensor
+  deploySeismicDetector(playerId: string, coordinate: HexCoordinate): SeismicDetector
+  processDetectionScan(sensorId: string): DetectionResult[]
+  
+  // Burrowing and Stealth
+  processBurrowTransition(unitId: string, targetState: 'surface' | 'underground'): BurrowResult
+  validateBurrowedMovement(unitId: string, path: UndergroundPath): MovementValidation
+  createTunnelConnection(unitId: string, startCoord: HexCoordinate, endCoord: HexCoordinate): TunnelCreation
+  
+  // Counter-Detection
+  applyDetectionImmunity(unitId: string, immunityType: ImmunityType): ImmunityResult
+  generateFalseTunnelSignature(playerId: string, coordinate: HexCoordinate): CounterIntelligence
+  processSeismicDeception(playerId: string, decoySignatures: DecoySignature[]): DeceptionResult
+  
+  // Detection Resolution
+  resolveDetectionAttempt(detectorId: string, targetId: string): DetectionOutcome
+  calculateDetectionRadius(sensorType: SensorType, upgrades: SensorUpgrade[]): number
+  validateDetectionCountermeasures(targetId: string, detectionAttempt: DetectionAttempt): CountermeasureResult
 }
 ```
 
@@ -396,11 +455,38 @@ interface CameraState {
 #### Resource Bundle
 ```typescript
 interface ResourceBundle {
+  // Consumable resources (stored amounts)
   metal: number
-  fuel: number
-  food: number
   polymers: number
+  
+  // Capacity-based resources (production rates)
+  food: number
+  fuel: number
   electricity: number
+}
+
+interface CapacityUsage {
+  // Current capacity consumption vs production
+  foodUsed: number
+  foodProduced: number
+  fuelUsed: number
+  fuelProduced: number
+  electricityUsed: number
+  electricityProduced: number
+}
+
+interface CapacityRequirement {
+  food?: number
+  fuel?: number
+  electricity?: number
+}
+
+interface CapacityAllocation {
+  id: string
+  playerId: string
+  entityId: string // unit or building ID
+  requirements: CapacityRequirement
+  timestamp: number
 }
 ```
 
@@ -408,8 +494,10 @@ interface ResourceBundle {
 ```typescript
 interface ResourceTransaction {
   playerId: string
-  type: 'income' | 'expense' | 'transfer'
-  resources: ResourceBundle
+  type: 'income' | 'expense' | 'transfer' | 'capacity-allocation' | 'capacity-release'
+  resources?: ResourceBundle // for consumable resources
+  capacityRequirement?: CapacityRequirement // for capacity-based resources
+  allocationId?: string // for capacity management
   source: string
   timestamp: number
 }
@@ -443,6 +531,80 @@ interface SubwayStation {
   factionBonuses: Map<FactionId, StationBonus>
   defenses: DefenseStructure[]
   breachWindow: BreachWindow | null
+}
+```
+
+### Worker System
+
+#### Worker Instance
+```typescript
+interface WorkerInstance {
+  id: string
+  playerId: string
+  factionId: FactionId
+  workerType: WorkerType
+  currentTask: WorkerTask | null
+  capabilities: WorkerCapability[]
+  upgrades: WorkerUpgrade[]
+  batteryLevel?: number // For Technomancer drones
+  tunnelConnectivity?: boolean // For Auporan Dwellers
+  railAccess?: boolean // For Industrial Warmachine
+}
+
+interface WorkerTask {
+  id: string
+  type: 'mine' | 'build' | 'repair' | 'haul' | 'garrison'
+  targetId: string
+  priority: number
+  estimatedCompletion: number
+}
+```
+
+### Detection System
+
+#### Detection Sensor
+```typescript
+interface DetectionSensor {
+  id: string
+  playerId: string
+  position: HexCoordinate
+  sensorType: 'underground' | 'seismic'
+  detectionRadius: number
+  energyCost: number
+  upgrades: SensorUpgrade[]
+  isActive: boolean
+}
+
+interface BurrowedUnit {
+  unitId: string
+  burrowState: 'surface' | 'transitioning' | 'underground'
+  transitionProgress: number
+  tunnelPath: HexCoordinate[]
+  detectionImmunity: ImmunityType[]
+  movementSpeed: number
+}
+```
+
+### Expansion System
+
+#### Expansion State
+```typescript
+interface ExpansionState {
+  playerId: string
+  factionId: FactionId
+  expansionType: ExpansionType
+  controlledTerritory: HexCoordinate[]
+  expansionRequirements: ExpansionRequirement[]
+  activeExpansions: ActiveExpansion[]
+}
+
+interface ActiveExpansion {
+  id: string
+  targetCoordinate: HexCoordinate
+  expansionMethod: 'walls' | 'energy-grid' | 'tunnels' | 'rails' | 'opportunistic'
+  progress: number
+  requiredResources: ResourceBundle
+  estimatedCompletion: number
 }
 ```
 

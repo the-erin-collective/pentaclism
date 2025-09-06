@@ -30,12 +30,14 @@ The core innovation lies in the Platonic Tempo Curve - where the number of faces
 
 #### Acceptance Criteria
 
-1. WHEN starting a match THEN the system SHALL initialize five resource types: Metal (natural), Fuel (natural), Food (produced), Polymers (produced), and Electricity (produced)
-2. WHEN extracting resources THEN the system SHALL allow Metal and Fuel extraction from visible/hidden deposits respectively
-3. WHEN producing resources THEN the system SHALL require Food, Polymers, and Electricity to be manufactured using buildings and workers
-4. WHEN Food runs out THEN the system SHALL cause living units to slowly lose HP
-5. WHEN Electricity runs out THEN the system SHALL power down buildings until capacity is restored
-6. WHEN playing different factions THEN the system SHALL provide faction-specific resource emphasis bonuses (Survivors=Metal, Fists=Fuel, Technomancers=Electricity, Dwellers=Food, Warmachine=Polymers)
+1. WHEN starting a match THEN the system SHALL initialize five resource types: Metal (natural, consumable), Fuel (natural, capacity-based), Food (produced, capacity-based), Polymers (produced, consumable), and Electricity (produced, capacity-based)
+2. WHEN extracting resources THEN the system SHALL allow Metal extraction from visible deposits (consumable) and Fuel extraction from hidden deposits (capacity-based production)
+3. WHEN producing resources THEN the system SHALL require Food and Electricity to be manufactured using buildings and workers (capacity-based production) and Polymers to be manufactured as consumable resources
+4. WHEN building units or structures THEN the system SHALL require consumable resources (Metal, Polymers) as one-time payments and capacity-based resources (Food, Fuel, Electricity) as ongoing capacity allocation (e.g., "2 food capacity" rather than "40 food payment")
+5. WHEN capacity-producing buildings are destroyed THEN the system SHALL reduce available capacity but maintain existing units/buildings that were already allocated capacity
+6. WHEN Food, Fuel, or Electricity capacity is insufficient THEN the system SHALL prevent construction of new units or buildings that require those capacity-based resources
+7. WHEN capacity-producing buildings are destroyed THEN the system SHALL maintain existing units/buildings but prevent new construction until capacity is restored
+8. WHEN playing different factions THEN the system SHALL provide faction-specific resource emphasis bonuses (Survivors=Metal, Fists=Fuel, Technomancers=Electricity, Dwellers=Food, Warmachine=Polymers)
 
 ### Requirement 3: Underground Expansion and Tier System
 
@@ -58,11 +60,11 @@ The core innovation lies in the Platonic Tempo Curve - where the number of faces
 #### Acceptance Criteria
 
 1. WHEN units are created THEN they start as untrained and SHALL be trainable into more specialized units
-2. WHEN units participate in combat THEN the system SHALL award experience points based on kills, damage dealt, and survival time
-3. WHEN units gain sufficient XP THEN the system SHALL promote them to higher ranks with improved combat statistics
-4. WHEN retraining units THEN the system SHALL reduce training time based on unit rank (higher rank = faster retraining)
+2. WHEN units participate in combat THEN the system SHALL award experience points: 50 XP for kills, 25 XP for assists, 5 XP per 10 seconds alive with combat participation tracking
+3. WHEN units gain sufficient XP THEN the system SHALL promote them through ranks with thresholds: Rank 0→1 at 100 XP, →2 at 300 XP, →3 at 700 XP, →4 at 1500 XP
+4. WHEN retraining units THEN the system SHALL reduce training time based on unit rank using formula: trainingTime = baseTime × (1 - rank × 0.15)
 5. WHEN upgrading units THEN the system SHALL limit maximum upgrades per unit based on faction's Platonic solid face count (Tetrahedron=1, Cube=2, Octahedron=3, Dodecahedron=4, Icosahedron=5)
-6. WHEN units are retrained THEN the system SHALL preserve their accumulated experience points
+6. WHEN units are retrained THEN the system SHALL preserve their accumulated experience points with partial XP retention options
 
 ### Requirement 5: Faction-Specific Signature Mechanics
 
@@ -151,7 +153,19 @@ The core innovation lies in the Platonic Tempo Curve - where the number of faces
 6. WHEN taking manual control THEN the system SHALL provide full camera freedom including free rotation, zoom, pan, saved camera positions, and optional auto-focus mode that can be toggled on/off
 7. WHEN players feel disoriented THEN the system SHALL provide orientation aids including compass directions, coordinate systems, pentagon grid overlays, and "return to base" hotkeys
 
-### Requirement 12: Geodesic Sphere Map System
+### Requirement 12: Spawn Zone System and Map Fairness
+
+**User Story:** As a player, I want maps with clearly defined spawn zones that ensure fair early game while creating dynamic contested areas for mid and late game, so that I can have competitive matches with predictable early expansion but unpredictable strategic depth.
+
+#### Acceptance Criteria
+
+1. WHEN maps are generated THEN the system SHALL create five distinct zone types: Red zones (spawn areas at pentagon tiles), Orange zones (inner expansion), Yellow zones (outer expansion), Light Blue zones (buffer areas), and Dark Blue zones (intra-spawn wild areas)
+2. WHEN placing faction starting locations THEN the system SHALL use Red zones at pentagon tiles to ensure geometric fairness and equal distances between players
+3. WHEN distributing resources THEN the system SHALL enforce minimum/maximum resource guarantees in Red, Orange, Yellow, and Light Blue zones to ensure fair early game competition
+4. WHEN placing strategic features THEN the system SHALL restrict subway stations, hazards, and asymmetrical terrain features to Dark Blue intra-spawn zones only
+5. WHEN in map editor THEN the system SHALL provide Fair Mode (enforces spawn zone rules for competitive play) and Creative Mode (allows rule breaking for custom maps and campaigns)
+
+### Requirement 13: Geodesic Sphere Map System
 
 **User Story:** As a player, I want to play on innovative geodesic sphere maps that eliminate corners and create true 360-degree strategic gameplay, so that I can experience unique tactical challenges not found in traditional flat RTS maps.
 
@@ -163,17 +177,7 @@ The core innovation lies in the Platonic Tempo Curve - where the number of faces
 4. WHEN playing on sphere maps THEN the system SHALL eliminate corner camping and edge advantages while creating true encirclement and 360-degree threat scenarios
 5. WHEN navigating the map THEN the system SHALL provide smooth zoom transitions from tactical (flat-feeling) to strategic (globe-visible) views with orientation tools including compass directions, coordinate systems, and pentagon grid overlays
 
-**User Story:** As a player, I want to play on innovative geodesic sphere maps that eliminate corners and create true 360-degree strategic gameplay, so that I can experience unique tactical challenges not found in traditional flat RTS maps.
-
-#### Acceptance Criteria
-
-1. WHEN maps are generated THEN the system SHALL create geodesic polyhedron surfaces composed primarily of hexagonal tiles with pentagons interspersed at regular intervals
-2. WHEN placing spawn points THEN the system SHALL use pentagon tiles as faction starting locations to ensure geometric fairness and strategic landmarks
-3. WHEN selecting map types THEN the system SHALL support Full Sphere maps (complete globe for macro games), Ring Maps (band around the globe for medium games), and Globe Fragment maps (up to two-thirds of sphere with irregular shapes for fast 1v1 games)
-4. WHEN playing on sphere maps THEN the system SHALL eliminate corner camping and edge advantages while creating true encirclement and 360-degree threat scenarios
-5. WHEN navigating the map THEN the system SHALL provide smooth zoom transitions from tactical (flat-feeling) to strategic (globe-visible) views with orientation tools including compass directions, coordinate systems, and pentagon grid overlays
-
-### Requirement 13: Map Editor and User-Generated Content
+### Requirement 14: Map Editor and User-Generated Content
 
 **User Story:** As a player and content creator, I want to create custom maps and scenarios using an integrated map editor, so that I can design unique gameplay experiences and share them with the community.
 
@@ -185,7 +189,7 @@ The core innovation lies in the Platonic Tempo Curve - where the number of faces
 4. WHEN publishing maps THEN the system SHALL provide a sharing system for community-created content with rating and search functionality
 5. WHEN loading custom maps THEN the system SHALL validate map balance and ensure compatibility with all faction mechanics
 
-### Requirement 14: Replay System with Event Streaming
+### Requirement 15: Replay System with Event Streaming
 
 **User Story:** As a player, spectator, and content creator, I want a comprehensive replay system that records game events and supports advanced viewing features, so that I can analyze matches, create content, and learn from gameplay.
 
@@ -197,19 +201,45 @@ The core innovation lies in the Platonic Tempo Curve - where the number of faces
 4. WHEN creating annotated replays THEN the system SHALL save annotations as additional events that can be merged with the original replay
 5. WHEN branching from replays THEN the system SHALL allow players to take control at any point and play from that state while preserving relevant annotations
 
-### Requirement 15: Subway Station System for Map Control
+### Requirement 16: Subway Station System for Map Control
 
 **User Story:** As a player, I want to capture and control ancient subway stations that provide mobility and faction-specific bonuses, so that I can gain strategic advantages and create dynamic frontlines across the map.
 
 #### Acceptance Criteria
 
-1. WHEN maps are generated THEN the system SHALL place subway stations at strategic locations with randomized pairings that are hidden until discovered
-2. WHEN capturing stations THEN the system SHALL require units to stand in the capture zone while a visible progress indicator (water tank) fills with the player's color
-3. WHEN stations are captured THEN the system SHALL provide instant teleportation between connected stations and faction-specific bonuses (Survivors=polymer income, Fists=pipeline extension, Technomancers=power grid, Dwellers=tunnel network, Warmachine=rail integration)
-4. WHEN stations are destroyed THEN the system SHALL create a temporary breach window where any faction can use the connection before it collapses
-5. WHEN viewing as spectator THEN the system SHALL show all subway connections while players only discover them by scouting or sending units through
+1. WHEN maps are generated THEN the system SHALL place subway stations only in intra-spawn zones (dark blue wild areas) at strategic locations with randomized pairings that are hidden until discovered, ensuring stations never spawn in spawn zones (red), inner expansion zones (orange), outer expansion zones (yellow), or buffer zones (light blue)
+2. WHEN capturing stations THEN the system SHALL require 60 seconds of uncontested unit presence while a visible progress indicator (water tank) fills with the player's color
+3. WHEN stations are uncontested THEN the system SHALL decay capture progress at 10% per 10 seconds and reset progress when enemy units contest
+4. WHEN stations are captured THEN the system SHALL provide instant teleportation between connected stations and faction-specific bonuses: Survivors (+5 Polymers per minute), Fists (pipeline network extension), Technomancers (power grid node), Dwellers (tunnel network entrance), Warmachine (rail network integration)
+5. WHEN stations are destroyed THEN the system SHALL create a 60-second breach window where any faction can use the connection before it collapses, with stations having 500 HP
+6. WHEN viewing as spectator THEN the system SHALL show all subway connections while players only discover them by scouting or sending units through
 
-### Requirement 16: Tutorial and Onboarding System
+### Requirement 17: Worker System and Expansion Mechanics
+
+**User Story:** As a player, I want each faction to have unique worker types and expansion mechanics that reflect their identity and strategic approach, so that I can experience distinct economic and territorial gameplay for each faction.
+
+#### Acceptance Criteria
+
+1. WHEN playing Scrapyard Survivors THEN the system SHALL provide Zama zama Crew workers that build all buildings (fastest at Tier 1, slower at higher tiers) and can upgrade to Zabatek Pilots (mobile depot/hauler, loses build ability)
+2. WHEN playing Celestial Fists THEN the system SHALL provide dual worker system: Citizen-Builders (best at walls/pipelines, weak at high-tech, can garrison for rifle fire) and Tianex Engineers (best at high-tech, weak at walls/pipelines, can garrison for RPG fire)
+3. WHEN playing Technomancers THEN the system SHALL provide Utility Drones (pilot-controlled, can assign build sites for auto-build) and Maintenance Drones (must attend construction, can accelerate builds, battery-powered with charging requirements)
+4. WHEN playing Auporan Dwellers THEN the system SHALL provide Bio-Cultivators (builds Tier 1 anywhere, tends Hydroponics) and Burrower Drones (builds all buildings only if connected to tunnel network, fast tunnel creation)
+5. WHEN playing Industrial Warmachine THEN the system SHALL provide Track Layers (builds all buildings, must attend, repairs rails) and Pravon Carts (hauler only, cannot build, upgradeable with defense modules, acts as static defense when parked on rails)
+6. WHEN expanding territory THEN the system SHALL require faction-specific expansion methods: Survivors (opportunistic outposts), Fists (wall-based fortress expansion), Technomancers (energy grid extension), Dwellers (tunnel network connectivity), Warmachine (rail network advancement)
+
+### Requirement 18: Detection and Counter-Detection System
+
+**User Story:** As a player, I want detection systems to counter underground and stealth mechanics, so that I can defend against burrowing units and maintain strategic visibility.
+
+#### Acceptance Criteria
+
+1. WHEN building detection systems THEN the system SHALL provide Underground Sensors that reveal burrowed units in radius and Seismic Detectors that detect tunneling activity with longer range but higher cost
+2. WHEN Auporan Dwellers use burrowing THEN the system SHALL allow units to transition between surface and underground states with 3-5 second transition time
+3. WHEN units are burrowed THEN the system SHALL make them concealed (invisible unless detected), unable to attack, and able to tunnel slowly while creating permanent tunnel connections
+4. WHEN advanced burrowed units are deployed THEN the system SHALL provide some units with limited detection immunity capabilities
+5. WHEN Dwellers use counter-intelligence THEN the system SHALL allow building false tunnel signatures to confuse seismic detection systems
+
+### Requirement 19: Tutorial and Onboarding System
 
 **User Story:** As a new player, I want faction-specific tutorials that teach core mechanics and signature abilities, so that I can quickly understand how to play my chosen faction effectively.
 
